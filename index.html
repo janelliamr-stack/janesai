@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Prompt System</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.2);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --highlight: #22c55e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+    /* Nav */
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; max-width: 900px; margin: 0 auto; }
+    .logo { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; }
+    .logo em { color: var(--accent); font-style: normal; }
+    nav ul { display: flex; gap: 20px; list-style: none; }
+    nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    nav a:hover { color: #fff; }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 50px 0 40px; }
+    .pill { display: inline-block; background: var(--accent-glow); border: 1px solid var(--accent); color: #93c5fd; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 900; line-height: 1.15; margin-bottom: 18px; }
+    h1 em { color: var(--accent); font-style: normal; }
+    .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 540px; margin: 0 auto 28px; }
+
+    .price-tag { display: inline-flex; align-items: center; gap: 12px; background: var(--card-bg); border: 1px solid var(--border); padding: 8px 18px; border-radius: 999px; margin-bottom: 28px; }
+    .original { text-decoration: line-through; color: var(--text-muted); font-size: 1rem; }
+    .sale { font-size: 1.5rem; font-weight: 800; color: var(--highlight); }
+    .badge-off { background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+
+    .btn-group { display: flex; flex-direction: column; gap: 12px; max-width: 380px; margin: 0 auto; }
+    @media(min-width: 480px) { .btn-group { flex-direction: row; } }
+    .btn { flex: 1; text-align: center; padding: 14px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 1rem; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 20px var(--accent-glow); }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { background: #1f2937; }
+
+    /* Marquee */
+    .ticker { overflow: hidden; background: #070a12; border-block: 1px solid var(--border); padding: 14px 0; margin: 40px 0; white-space: nowrap; }
+    .ticker-track { display: inline-flex; gap: 30px; animation: scroll 20s linear infinite; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+    .ticker-track span span { color: var(--accent); margin-right: 6px; }
+    @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* Sections */
+    section { padding: 40px 0; }
+    .section-label { color: var(--accent); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .section-head { font-size: 1.8rem; font-weight: 800; margin-bottom: 24px; }
+
+    /* Core Prompts List */
+    .prompt-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 30px; }
+    .prompt-list li { display: flex; justify-content: space-between; background: var(--card-bg); border: 1px solid var(--border); padding: 12px 18px; border-radius: 8px; font-size: 0.95rem; }
+    .prompt-count { background: #1e293b; color: var(--accent); font-weight: 700; font-size: 0.85rem; padding: 2px 8px; border-radius: 4px; }
+
+    /* Grid for Bonuses */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 30px; }
+    .grid-card { background: var(--card-bg); border: 1px solid var(--border); padding: 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .grid-card::before { content: "✓"; color: var(--accent); font-weight: 800; }
+
+    /* Tool Badges */
+    .tool-group { margin-bottom: 20px; }
+    .tool-group p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; }
+    .tool-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tool-badge { background: #1f2937; border: 1px solid #374151; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; }
+
+    /* Steps */
+    .steps-list { display: flex; flex-direction: column; gap: 14px; }
+    .step-card { display: flex; gap: 16px; background: var(--card-bg); border: 1px solid var(--border); padding: 16px; border-radius: 10px; }
+    .step-num { font-size: 1.2rem; font-weight: 900; color: var(--accent); min-width: 30px; }
+    .step-info h4 { font-size: 1rem; margin-bottom: 4px; }
+    .step-info p { font-size: 0.9rem; color: var(--text-muted); }
+
+    /* QR / Payment Card */
+    .pay-card { background: var(--card-bg); border: 2px dashed #2563eb; padding: 24px; border-radius: 14px; text-align: center; margin-top: 30px; }
+    .qr-placeholder { max-width: 240px; margin: 16px auto; border-radius: 10px; overflow: hidden; background: #fff; padding: 10px; }
+    .qr-placeholder img { width: 100%; display: block; }
+    .pay-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 0.95rem; }
+    .pay-row:last-child { border: none; }
+
+    /* Divider */
+    hr { border: 0; height: 1px; background: var(--border); margin: 30px 0; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CREATOR<em>PROMPTS</em></div>
+    <ul>
+      <li><a href="#included">Included</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#order">Order</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <!-- HERO SECTION -->
+    <div class="hero">
+      <span class="pill">TikTok Affiliate Content System</span>
+      <h1>Create content.<br><em>No camera.<br>No skills needed.</em></h1>
+      <p>Complete AI prompt system para sa affiliate creators. Ready-to-use lahat — copy, paste, at generate lang.</p>
+
+      <div class="price-tag">
+        <span class="original">₱1,450</span>
+        <span class="sale">₱750</span>
+        <span class="badge-off">48% OFF</span>
+      </div>
+
+      <div class="btn-group">
+        <a href="#order" class="btn btn-primary">Order Now - ₱750</a>
+        <a href="#included" class="btn btn-secondary">See What's Inside</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TICKER / MARQUEE BANNER -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span><span>★</span> No Photoshoot Needed</span>
+      <span><span>★</span> Lifetime Access</span>
+      <span><span>★</span> Free Future Updates</span>
+      <span><span>★</span> Works with Free AI Tools</span>
+      <span><span>★</span> Step-by-Step Guide</span>
+      <span><span>★</span> Unlimited Usage</span>
+      <!-- Duplicate for smooth endless looping -->
+      <span><span>★</span> No Photoshoot Needed</span>
+      <span><span>★</span> Lifetime Access</span>
+      <span><span>★</span> Free Future Updates</span>
+      <span><span>★</span> Works with Free AI Tools</span>
+      <span><span>★</span> Step-by-Step Guide</span>
+      <span><span>★</span> Unlimited Usage</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- INVENTORY / CURRICULUM -->
+    <section id="included">
+      <p class="section-label">What's Inside</p>
+      <h2 class="section-head">Everything you need to start.</h2>
+
+      <p style="color:var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; font-weight: 600;">Core Prompts — Full Access</p>
+      <ul class="prompt-list">
+        <li><span>Face Swap Prompts</span><span class="prompt-count">x2</span></li>
+        <li><span>Background Studio Prompts</span><span class="prompt-count">x7</span></li>
+        <li><span>AI Video Prompts</span><span class="prompt-count">x8</span></li>
+        <li><span>Outfit Change Prompts</span><span class="prompt-count">x2</span></li>
+        <li><span>Non-Mirror Selfie Prompts</span><span class="prompt-count">x1</span></li>
+        <li><span>Holding Hanger Prompts</span><span class="prompt-count">x1</span></li>
+        <li><span>Footwear Background & Replacement</span><span class="prompt-count">x2</span></li>
+        <li><span>High-Converting Aesthetic Setups</span><span class="prompt-count">x20+</span></li>
+      </ul>
+
+      <p style="color:var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; font-weight: 600;">Exclusive Niche Bonuses</p>
+      <div class="grid-2">
+        <div class="grid-card">Pants & Bottoms Prompts</div>
+        <div class="grid-card">Faceless Universal Prompts</div>
+        <div class="grid-card">Bags (Image + AI Video)</div>
+        <div class="grid-card">Men's Fashion Setups</div>
+        <div class="grid-card">Beauty & Skincare Prompts</div>
+        <div class="grid-card">Lippie Swatch Prompts</div>
+        <div class="grid-card">Talking AI Podcast Style</div>
+        <div class="grid-card">Shoes Unboxing & ASMR</div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- COMPATIBLE TOOLS -->
+    <section id="tools">
+      <p class="section-label">Compatible Tools</p>
+      <h2 class="section-head">Works with free AI apps.</h2>
+
+      <div class="tool-group">
+        <p>Image Generation</p>
+        <div class="tool-tags">
+          <span class="tool-badge">ChatGPT</span>
+          <span class="tool-badge">Gemini</span>
+          <span class="tool-badge">Midjourney</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <p>Video Generation</p>
+        <div class="tool-tags">
+          <span class="tool-badge">Kling AI</span>
+          <span class="tool-badge">Grok</span>
+          <span class="tool-badge">PixVerse</span>
+          <span class="tool-badge">ElevenLabs</span>
+          <span class="tool-badge">CapCut</span>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- HOW TO ORDER & PAYMENT -->
+    <section id="order">
+      <p class="section-label">How to Order</p>
+      <h2 class="section-head">4 steps lang.</h2>
+
+      <div class="steps-list">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-info">
+            <h4>Mag-send ng Bayad</h4>
+            <p>I-send ang payment sa GCash or Maya details sa ibaba.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-info">
+            <h4>I-screenshot ang Receipt</h4>
+            <p>I-save ang confirmation screenshot bago mag-exit sa app.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-info">
+            <h4>I-send ang Proof of Payment</h4>
+            <p>I-chat sa akin sa Messenger o Telegram kasama ang email mo.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">04</div>
+          <div class="step-info">
+            <h4>Tanggapin ang Vault Access</h4>
+            <p>Ipapadala ang Notion / Drive link sa loob ng ilang minuto.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pay-card">
+        <h3>Payment Details</h3>
+        <div class="qr-placeholder">
+          <!-- Palitan ang qr.jpg ng sarili mong photo file sa folder -->
+          <img src="qr.jpg" alt="GCash QR Code">
+        </div>
+        <div class="pay-row"><span>Channel:</span><strong>GCash / Maya</strong></div>
+        <div class="pay-row"><span>Account Name:</span><strong>JUAN DELA CRUZ</strong></div>
+        <div class="pay-row"><span>Number:</span><strong>0917 123 4567</strong></div>
+        <div class="pay-row"><span>Amount:</span><strong style="color:var(--highlight);">₱750.00</strong></div>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>
